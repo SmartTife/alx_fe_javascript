@@ -85,7 +85,7 @@ window.onload = () => {
 
 
 
-const serverUrl = 'https://mockapi.io/clone/68682b9fd5933161d70afe93'; // Replace with your actual MockAPI endpoint
+const serverUrl = 'https://68682b9fd5933161d70afe92.mockapi.io/quotes';
 
 async function fetchServerQuotes() {
   try {
