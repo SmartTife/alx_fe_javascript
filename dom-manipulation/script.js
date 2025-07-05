@@ -84,3 +84,64 @@ window.onload = () => {
 
 
 
+
+const serverUrl = 'https://mockapi.io/clone/68682b9fd5933161d70afe93'; // Replace with your actual MockAPI endpoint
+
+async function fetchServerQuotes() {
+  try {
+    const response = await fetch(serverUrl);
+    const serverQuotes = await response.json();
+
+    const localQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
+
+    // Conflict resolution: server quotes override duplicates
+    const mergedQuotes = [...serverQuotes];
+
+    localQuotes.forEach(localQuote => {
+      const existsOnServer = serverQuotes.some(serverQuote =>
+        serverQuote.text === localQuote.text && serverQuote.category === localQuote.category
+      );
+      if (!existsOnServer) {
+        mergedQuotes.push(localQuote);
+      }
+    });
+
+    localStorage.setItem('quotes', JSON.stringify(mergedQuotes));
+    quotes = mergedQuotes;
+    populateCategories();
+    displayRandomQuote();
+
+    notifyUser("Quotes synced with server.");
+
+  } catch (error) {
+    console.error("Error fetching server quotes:", error);
+  }
+}
+
+// Push local new quotes to the server (optional)
+async function syncLocalQuotesToServer() {
+  for (let quote of quotes) {
+    try {
+      const response = await fetch(serverUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(quote)
+      });
+    } catch (err) {
+      console.error("Failed to sync quote to server:", err);
+    }
+  }
+}
+
+
+function notifyUser(message) {
+  const note = document.getElementById('notification');
+  note.textContent = message;
+  setTimeout(() => {
+    note.textContent = '';
+  }, 4000);
+}
+
+setInterval(fetchServerQuotes, 10000); 
+
+
